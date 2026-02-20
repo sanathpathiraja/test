@@ -1,0 +1,89 @@
+﻿        <table class="body-wrap"
+            style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; background-color: transparent; margin: 0;">
+            <tr
+                style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;"
+                    valign="top"></td>
+                <td class="container" width="600"
+                    style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto;"
+                    valign="top">
+                    <div class="content"
+                        style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto; padding: 20px;">
+                        <table class="main" width="100%" cellpadding="0" cellspacing="0" itemprop="action" itemscope
+                            itemtype="http://schema.org/ConfirmAction"
+                            style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; border-radius: 3px; margin: 0; border: none;">
+                            <tr
+                                style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                <td class="content-wrap"
+                                    style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; color: #495057; font-size: 14px; vertical-align: top; margin: 0;padding: 30px; box-shadow: 0 0.75rem 1.5rem rgba(18,38,63,.03); ;border-radius: 7px; background-color: #fff;"
+                                    valign="top">
+                                    <meta itemprop="name" content="Confirm Email"
+                                        style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;" />
+                                    <table width="100%" cellpadding="0" cellspacing="0"
+                                        style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                        <tr
+                                            style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                            <td class="content-block"
+                                                style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"
+                                                valign="top">
+                                               <p> Hi User_ToUpdt,<p>
+                                                Thank you for choosing Escape Roots for your travel plans. We are happy to inform you that your booking is currently pending confirmation. To secure your reservation, please complete the payment at your earliest convenience.                                             
+                                           <br><br>
+                                           <b>Booking Reference:</b>  BookingRef_ToUpdt <br>
+                                           <b> Travel Date:</b> </b> BookingDate_ToUpdt <br>
+                                           <b> Total Amount:</b> Tot_Amount_ToUpdt0 AUD<br>
+                                             <b> Minimum Amount Required:</b> Min_Amount_ToUpdt AUD<br>
+                                            </td>
+                                        </tr>
+                                            <tr
+                                            style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                            <td class="content-block"
+                                                style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"
+                                                valign="top">
+                                              To confirm your booking, a minimum payment of Percentage_ToUpdt of the total amount (which is Min_Amount_ToUpdt AUD) is required. If you prefer, you can pay the full amount of $145 to confirm your reservation.ment using the options below:
+                                              <br>
+                                              You can complete the payment using one of the options below:<br>
+                                        [Payment Method 1] <br>
+                                        [Payment Method 2] <br>
+                                        [Payment Method 3] <br>
+                                        Once the payment is processed, your booking will be confirmed, and we will send you a final confirmation email. Please complete your payment by [Payment Deadline] to ensure your spot.
+                                        </td>
+                                        </tr>
+                                        <tr
+                                            style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                            <td class="content-block"
+                                                style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"
+                                                valign="top">
+                                   If you have any questions or need assistance, please feel free to reach out to our customer support team at support@escaperoots.com.au / +4xxxxxxx.
+                                   <br>
+                                   Thank you for choosing Escape Roots. We look forward to finalizing your booking and ensuring a wonderful travel experience.
+                                   </td>
+                                        </tr>
+                              
+                                        <tr
+                                            style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                            <td class="content-block"
+                                                style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"
+                                                valign="top">
+                                                Regards, <br>
+                                                <b>Escape Roots</b>
+                                                <p>Support Team</p>
+                                            </td>
+                                        </tr>
+
+                                        <tr
+                                            style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                            <td class="content-block"
+                                                style="text-align: center;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0;"
+                                                valign="top">
+                                                © Year_ToUpdt Escape Roots
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
