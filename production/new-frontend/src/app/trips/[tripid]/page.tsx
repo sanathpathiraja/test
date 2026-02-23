@@ -113,7 +113,7 @@ export default async function Page({
             <div className="w-full flex lg:flex-row flex-col sm:mt-16 mt-8">
               <TripDetailsTabs details={tripDetails} />
 
-              <div className="w-2/5 h-60 px-4 lg:block hidden">
+              <div className="w-full lg:w-2/5 h-auto px-4 mt-6 lg:mt-0">
                 <div className="w-full p-8 bg-white rounded-lg shadow-lg">
                   <h4 className="text-2xl font-semibold pb-4">
                     Plan Your Journey
