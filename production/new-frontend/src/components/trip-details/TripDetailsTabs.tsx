@@ -5,6 +5,7 @@ import { ResponseType, TripPlanType, TripType } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
 import TripPlans from "./TripPlans";
 import { endpoints } from "@/lib/consts";
+import { normalizeRichTextHtml } from "@/lib/funcs";
 import Icon from "../Icon";
 import PhysicalRating from "./PhysicalRating";
 
@@ -148,8 +149,10 @@ function TripDetailsTabs({ details }: TripDetailsTabsProps) {
               {...tabAnimation}
             >
               <div
-                dangerouslySetInnerHTML={{ __html: details.description }}
-                className="text-lg"
+                dangerouslySetInnerHTML={{
+                  __html: normalizeRichTextHtml(details.description),
+                }}
+                className="text-lg leading-8 text-gray-800 break-words [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:font-semibold"
               />
               <div className="mt-8 w-full">
                 {overviews.map((overview, index) => (

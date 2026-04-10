@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { endpoints } from "@/lib/consts";
-import { ResponseType, TripPlanType } from "@/lib/types";
+import { normalizeRichTextHtml } from "@/lib/funcs";
+import { TripPlanType } from "@/lib/types";
 
 type TripPlanProps = {
   plan: TripPlanType;
@@ -71,7 +71,12 @@ function TripPlan({
             className="px-4 bg-gray-50/60 rounded-lg overflow-hidden"
           >
             <div className="py-4">
-              <div dangerouslySetInnerHTML={{ __html: plan.description }} />
+              <div
+                className="leading-8 text-gray-800 break-words [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:font-semibold"
+                dangerouslySetInnerHTML={{
+                  __html: normalizeRichTextHtml(plan.description),
+                }}
+              />
               <div className="w-full flex flex-wrap justify-between">
                 {plan.accomadationDetails.length > 0 && (
                   <div className="w-[calc(50%-4px)] mt-8">

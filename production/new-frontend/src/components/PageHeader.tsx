@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { normalizeRichTextHtml } from "@/lib/funcs";
 import React from "react";
 
 type PageHeaderProps = {
@@ -28,8 +29,10 @@ function PageHeader({ details, description, tags }: PageHeaderProps) {
         </h2>
         {description && description.length ? (
           <div
-            className="mt-4 text-base text-gray-50 max-w-4xl flex flex-col justify-center text-center pt-6 border-t border-gray-200 px-2"
-            dangerouslySetInnerHTML={{ __html: description || "" }}
+            className="mt-4 text-base text-gray-50 max-w-4xl flex flex-col justify-center text-center pt-6 border-t border-gray-200 px-2 leading-8 [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:font-semibold"
+            dangerouslySetInnerHTML={{
+              __html: normalizeRichTextHtml(description),
+            }}
           />
         ) : null}
         {tags && (
