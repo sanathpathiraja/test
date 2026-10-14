@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { BookingDetailsType, BookingType } from "@/lib/types";
-import { PaymentElement, useCheckout, useElements, useStripe } from "@stripe/react-stripe-js";
+import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Button } from "../ui/button";
 import Loading from "../Loading";
 import BookNowCard from "./BookNowCard";
@@ -17,58 +17,48 @@ const decimalFormatter = new Intl.NumberFormat("en-US", {
 type Stage3Props = {
 	data: BookingDetailsType;
 	previousStage: () => void;
-	getClientSecrete: () => Promise<string>;
+	clientSecret: string;
 	booking: BookingType;
 };
 
-function Stage3({ data, previousStage, getClientSecrete, booking }: Stage3Props) {
-	const [clientSecret, setClientSecret] = useState<string>();
+function Stage3({ data, previousStage, clientSecret, booking }: Stage3Props) {
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string>();
+	// Set once Stripe has taken the payment, so it cannot be submitted again
+	const [paymentCompleted, setPaymentCompleted] = useState<boolean>(false);
 
 	const navigation = useRouter();
 	const stripe = useStripe();
 	const elements = useElements();
 
+	// Asks the server to verify the payment with Stripe and confirm the booking. Only identifiers are sent:
+	// the server never takes the payment status or amount from the browser.
 	async function updateBookingPayment(paymentRef: string) {
-		const updateData = {
-			amount: booking.totalAmount,
+		const reconcileData = {
+			id: booking.paymentId,
 			bookingId: booking.bookingId,
 			bookingRef: booking.bookingRef,
-			description: `Payment for booking ${booking.bookingId}`,
-			id: booking.paymentId,
-			isActive: true,
-			isSuccessfull: true,
-			isVerified: false,
-			paymentMethod: 1,
 			paymentReference: paymentRef,
-			primaryEmail: data.primary.email,
-			primaryUser: data.primary.fullName,
-			responseMessage: "Payment successful",
 		};
+		const notConfirmedMessage = `Your payment was received, but we couldn't confirm your booking automatically. Please don't pay again - contact us with booking reference ${booking.bookingRef}.`;
 		try {
 			const response = await fetch(endpoints.bookings.updatebookingpayment(booking.bookingId), {
 				method: "PUT",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify(updateData),
+				body: JSON.stringify(reconcileData),
 			});
 			if (!response.ok) {
-				setError("Failed to update booking payment if.");
-				console.log(
-					"Failed to update booking payment",
-					response.status,
-					response.statusText,
-					await response.json()
-				);
+				console.error("Failed to confirm booking payment", response.status, await response.json().catch(() => null));
+				setError(notConfirmedMessage);
 				window.scrollTo({ top: 0, behavior: "smooth" });
 				return;
 			}
 			navigation.replace(`/booking-confirmation?ref=${booking.bookingRef}&email=${data.primary.email}`);
 		} catch (error) {
-			console.log("Failed to update booking payment catch", error);
-			setError("Failed to update booking payment catch.");
+			console.error("Failed to confirm booking payment", error);
+			setError(notConfirmedMessage);
 			window.scrollTo({ top: 0, behavior: "smooth" });
 		} finally {
 			setLoading(false);
@@ -76,6 +66,7 @@ function Stage3({ data, previousStage, getClientSecrete, booking }: Stage3Props)
 	}
 
 	async function handleSubmit() {
+		if (paymentCompleted) return;
 		setLoading(true);
 		if (!stripe || !elements || !clientSecret) {
 			setLoading(false);
@@ -93,7 +84,6 @@ function Stage3({ data, previousStage, getClientSecrete, booking }: Stage3Props)
 
 		const { error: paymentError, paymentIntent } = await stripe.confirmPayment({
 			elements: elements,
-			clientSecret: clientSecret,
 			redirect: "if_required",
 			confirmParams: {
 				return_url: `${window.location.origin}/booking-confirmation?ref=${booking.bookingRef}&email=${data.primary.email}`,
@@ -107,20 +97,15 @@ function Stage3({ data, previousStage, getClientSecrete, booking }: Stage3Props)
 			return;
 		}
 		if (paymentIntent.status === "succeeded") {
+			setPaymentCompleted(true);
 			await updateBookingPayment(paymentIntent.id);
+		} else if (paymentIntent.status === "processing") {
+			setPaymentCompleted(true);
+			setError(`Your payment is being processed. Please don't pay again - we'll confirm booking ${booking.bookingRef} once it completes.`);
+			window.scrollTo({ top: 0, behavior: "smooth" });
 		}
 		setLoading(false);
 	}
-
-	useEffect(() => {
-		getClientSecrete()
-			.then((secret) => {
-				setClientSecret(secret);
-			})
-			.catch((err) => {
-				console.error("Failed to fetch client secret:", err);
-			});
-	}, []);
 
 	return (
 		<div className="w-full flex items-center flex-col gap-4">
@@ -152,7 +137,7 @@ function Stage3({ data, previousStage, getClientSecrete, booking }: Stage3Props)
 							className="w-full text-base h-14 mt-4 rounded-sm"
 							loading={loading}
 							onClick={handleSubmit}
-							disabled={!stripe || !elements || loading}
+							disabled={!stripe || !elements || loading || paymentCompleted}
 						>
 							Pay Now
 						</Button>

@@ -6,8 +6,9 @@ module.exports = {
       script: "node_modules/next/dist/bin/next",
       args: "start -p 4350",
       env: {
-        NODE_ENV: "production",
-      },
-    },
-  ],
+        NODE_ENV: "production"
+      }
+    }
+  ]
 };
+

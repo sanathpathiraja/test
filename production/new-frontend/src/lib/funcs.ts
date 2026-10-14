@@ -130,16 +130,6 @@ export function getTextFromTags(text: string | null): string | null {
 		.trim();
 }
 
-export function normalizeRichTextHtml(html?: string | null): string {
-	if (!html) return "";
-
-	return html
-		.replace(/&nbsp;/gi, " ")
-		.replace(/\u00a0/g, " ")
-		.replace(/<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, "")
-		.trim();
-}
-
 /* ---------------------------------------
    ASYNC HELPERS
 ---------------------------------------- */

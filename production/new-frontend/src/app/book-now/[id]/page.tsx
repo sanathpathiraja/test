@@ -1,6 +1,6 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Container from "@/components/Container";
 import Icon from "@/components/Icon";
 import Loading from "@/components/Loading";
@@ -13,7 +13,11 @@ import Stage3 from "@/components/book-now/Stage3";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 
-const stripePromise = loadStripe(environment.STRIPE_KEY);
+// loadStripe crashes on an undefined key, so only initialise Stripe when the publishable key is configured
+const stripePromise = environment.STRIPE_KEY ? loadStripe(environment.STRIPE_KEY) : null;
+if (!stripePromise) {
+	console.error("Stripe publishable key is not configured (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY*). Payments are unavailable.");
+}
 
 type BookingStageType = {
 	value: string;
@@ -61,6 +65,10 @@ function Page() {
 	const [tripDetails, setTripDetails] = useState<TripType>();
 	const [bookingInfo, setBookingInfo] = useState<BookingInfoType>();
 	const [booking, setBooking] = useState<BookingType>();
+	const [clientSecret, setClientSecret] = useState<string>();
+	const [paymentSetupError, setPaymentSetupError] = useState<string>();
+	// One PaymentIntent per booking: effects can run more than once (e.g. React StrictMode), so reuse the request
+	const paymentIntentRequest = useRef<{ bookingId: string; promise: Promise<string> }>(undefined);
 	const [tabStages, setTabStages] = useState([
 		{
 			value: "details",
@@ -140,26 +148,26 @@ function Page() {
 		}
 	}
 
-	async function fetchClientSecret(): Promise<string> {
-		if (!booking) return "";
+	async function fetchClientSecret(booking: BookingType): Promise<string> {
 		const response = await fetch(endpoints.bookings.createPaymentIntent, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
+			// The server works out the amount and currency from the booking
 			body: JSON.stringify({
-				amount: booking.totalAmount,
 				bookingId: booking.bookingId,
 				bookingRef: booking.bookingRef,
-				currency: "aud",
 				paymentId: booking.paymentId,
 			}),
 		});
+		const data = await response.json().catch(() => null);
 		if (!response.ok) {
-			throw new Error("Failed to fetch client secret");
+			throw new Error(data?.error || "We couldn't start the payment. Please refresh the page and try again.");
 		}
-		const data = await response.json();
-		console.log("Client secret fetched successfully", data);
+		if (!data?.clientSecret) {
+			throw new Error("We couldn't start the payment. Please refresh the page and try again.");
+		}
 		return data.clientSecret;
 	}
 
@@ -178,6 +186,12 @@ function Page() {
 	function previousStage() {
 		const currentIndex = tabStages.findIndex((stage) => stage.isActive);
 		if (currentIndex > 0) {
+			// Booking details can change on the first stage, so the created booking no longer applies
+			if (currentIndex - 1 === 0) {
+				setBooking(undefined);
+				setClientSecret(undefined);
+				setPaymentSetupError(undefined);
+			}
 			const newStages = tabStages.map((stage, index) => ({
 				...stage,
 				isActive: index === currentIndex - 1,
@@ -190,6 +204,30 @@ function Page() {
 		getTripDetails();
 		getTripBookingInfo();
 	}, []);
+
+	const isPaymentStage = tabStages[2].isActive;
+
+	// Create the booking's PaymentIntent on reaching the payment stage; Stripe Elements is then initialised from it
+	useEffect(() => {
+		if (!isPaymentStage || !booking || clientSecret) return;
+		if (paymentIntentRequest.current?.bookingId !== booking.bookingId) {
+			paymentIntentRequest.current = { bookingId: booking.bookingId, promise: fetchClientSecret(booking) };
+		}
+		const request = paymentIntentRequest.current;
+		let cancelled = false;
+		setPaymentSetupError(undefined);
+		request.promise
+			.then((secret) => {
+				if (!cancelled) setClientSecret(secret);
+			})
+			.catch((err) => {
+				console.error("Failed to fetch client secret:", err);
+				if (!cancelled) setPaymentSetupError(err instanceof Error && err.message ? err.message : "We couldn't start the payment. Please refresh the page and try again.");
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [isPaymentStage, booking, clientSecret]);
 
 	return (
 		<main className="w-full pt-[8vh] min-h-screen">
@@ -228,27 +266,44 @@ function Page() {
 									details={tripDetails}
 									info={bookingInfo}
 									previousStage={previousStage}
+									booking={booking}
 									setBooking={setBooking}
 								/>
 							)}
-							{tabStages[2].isActive && (
-								<Elements
-									stripe={stripePromise}
-									options={{
-										mode: "payment",
-										currency: "aud",
-										amount: booking?.totalAmount,
-										paymentMethodTypes: ["card"],
-									}}
-								>
-									<Stage3
-										data={data}
-										previousStage={previousStage}
-										getClientSecrete={fetchClientSecret}
-										booking={booking!}
-									/>
-								</Elements>
-							)}
+							{tabStages[2].isActive &&
+								(stripePromise ? (
+									clientSecret ? (
+										// Amount, currency and payment methods come from the booking's PaymentIntent
+										<Elements key={clientSecret} stripe={stripePromise} options={{ clientSecret }}>
+											<Stage3
+												data={data}
+												previousStage={previousStage}
+												clientSecret={clientSecret}
+												booking={booking!}
+											/>
+										</Elements>
+									) : (
+										<BookNowCard className="w-full max-w-xl mx-auto">
+											{paymentSetupError ? (
+												<div className="w-full bg-red-500/10 border border-red-500 p-4 rounded-sm text-sm flex items-center text-red-500">
+													<Icon.Warning className="inline mr-2" />
+													{paymentSetupError}
+												</div>
+											) : (
+												<div className="w-full h-120 flex items-center justify-center">
+													<Loading />
+												</div>
+											)}
+										</BookNowCard>
+									)
+								) : (
+									<BookNowCard className="w-full max-w-xl mx-auto">
+										<div className="w-full bg-red-500/10 border border-red-500 p-4 rounded-sm text-sm flex items-center text-red-500">
+											<Icon.Warning className="inline mr-2" />
+											Online payment is currently unavailable. Please contact us to complete your booking.
+										</div>
+									</BookNowCard>
+								))}
 						</div>
 					</Container>
 				)}

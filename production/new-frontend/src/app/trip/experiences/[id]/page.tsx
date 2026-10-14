@@ -4,11 +4,7 @@ import PageCoverImage from "@/components/PageCoverImage";
 import PageHeader from "@/components/PageHeader";
 import TripListPage from "@/components/TripListPage";
 import { buildImageUrl, endpoints, environment } from "@/lib/consts";
-import {
-  extractIdFromSlug,
-  getTextFromTags,
-  normalizeRichTextHtml,
-} from "@/lib/funcs";
+import { extractIdFromSlug, getTextFromTags } from "@/lib/funcs";
 import {
   DetailsPageType,
   ImageType,
@@ -144,10 +140,8 @@ export default async function Page({
                 {data.name}
               </h1>
               <div
-                className="mt-4 text-base text-gray-500 leading-8 [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:font-semibold"
-                dangerouslySetInnerHTML={{
-                  __html: normalizeRichTextHtml(data.description),
-                }}
+                className="mt-4 text-base text-gray-500"
+                dangerouslySetInnerHTML={{ __html: data.description || "" }}
               />
             </div>
           )}

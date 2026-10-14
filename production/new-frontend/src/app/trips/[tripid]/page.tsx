@@ -67,6 +67,7 @@ export default async function Page({
   const { tripid } = await params;
   const realId = extractIdFromSlug(tripid);
 
+  // safety check
   if (!realId) {
     notFound();
   }
@@ -83,10 +84,10 @@ export default async function Page({
     const { data: tripDetails } = (await res.json()) as ResponseType<TripType>;
 
     return (
-      <main className={`w-full min-h-[80vh] pt-[8vh]`}>
+      <main className="w-full min-h-[80vh] pt-[8vh]">
         <Container containerClassName="sm:px-4 px-2">
           <div className="w-full md:py-12 py-8">
-            {/* heading */}
+            {/* Header */}
             <div className="w-full">
               <div className="flex justify-between lg:items-end items-start lg:flex-row flex-col gap-4 sm:pb-8 pb-4 border-b border-gray-200">
                 <div className="grow">
@@ -99,17 +100,12 @@ export default async function Page({
                 </div>
                 <div className="flex flex-col min-w-[280px] lg:items-end">
                   <div className="flex flex-col">
-                    <span className="font-light sm:text-xl text-sm w-full">
-                      Starting From
-                    </span>
+                    <span className="font-light sm:text-xl text-sm w-full">Starting From</span>
                     <span>
                       <span className="sm:text-4xl text-3xl font-bold text-primary">
                         A${tripDetails.accomadationPriceAdult?.toLocaleString()}
                       </span>
-                      <span className="sm:text-lg text-sm font-light">
-                        {" "}
-                        / per adult
-                      </span>
+                      <span className="sm:text-lg text-sm font-light"> / per adult</span>
                     </span>
                   </div>
                 </div>
@@ -118,7 +114,7 @@ export default async function Page({
               <div className="w-full lg:hidden flex items-center fixed bottom-0 left-0 right-0 bg-gray-50 z-10 p-4 shadow-[2px_0_24px_6px_rgba(0,0,0,0.2)]">
                 <div className="w-1/3 flex justify-center">
                   <a
-                    href={`https://escaperoots.com.au/book-now/${tripDetails.id}`}
+                    href={`/book-now/${tripDetails.id}`}
                     className="w-full min-w-[140px]"
                   >
                     <Button
@@ -132,17 +128,12 @@ export default async function Page({
                 </div>
                 <div className="w-2/3 flex justify-end items-center px-4">
                   <div className="flex flex-col">
-                    <span className="font-light sm:text-xl text-sm w-full">
-                      Starting From
-                    </span>
+                    <span className="font-light sm:text-xl text-sm w-full">Starting From</span>
                     <span>
                       <span className="sm:text-4xl text-2xl font-bold text-primary">
                         A${tripDetails.accomadationPriceAdult.toLocaleString()}
                       </span>
-                      <span className="sm:text-lg text-sm font-light">
-                        {" "}
-                        / per adult
-                      </span>
+                      <span className="sm:text-lg text-sm font-light"> / per adult</span>
                     </span>
                   </div>
                 </div>
@@ -159,40 +150,38 @@ export default async function Page({
                 </span>
               </div>
             </div>
-            {/* trip gallery */}
+
             <TripGallery images={tripDetails.tripImages} />
-            {/* trip details */}
+
             <div className="w-full flex lg:flex-row flex-col sm:mt-16 mt-8">
               <TripDetailsTabs details={tripDetails} />
+
               <div className="w-2/5 h-60 px-4 lg:block hidden">
                 <div className="w-full p-8 bg-white rounded-lg shadow-lg">
                   <h4 className="text-2xl font-semibold pb-4">
                     Plan Your Journey
                   </h4>
-                  <div className="w-full my-4">
-                    <Link
-                      href={`/book-now/${tripDetails.id}`}
-                      className="w-full"
+
+                  <Link href={`/book-now/${tripDetails.id}`}>
+                    <Button
+                      variant="secondary"
+                      className="w-full font-bold text-lg h-12"
                     >
-                      <Button
-                        variant={"secondary"}
-                        className="w-full font-bold text-lg h-12"
-                        size={"lg"}
-                      >
-                        Book Now
-                      </Button>
-                    </Link>
-                  </div>
+                      Book Now
+                    </Button>
+                  </Link>
+
                   <div className="mt-8">
-                    <h4 className="text-2xl flex items-center gap-4 font-normal">
+                    <h4 className="text-2xl flex items-center gap-4">
                       <Image
                         src={strengthImg}
-                        alt="Physycal Strength Icon"
+                        alt="Physical Strength Icon"
                         className="h-7 w-7 mb-2"
                       />
-                      <span>Physical Rating</span>
+                      Physical Rating
                       <Icon.CheckCircle className="text-primary" />
                     </h4>
+
                     <PhysicalRating
                       rating={tripDetails.physicalRating || 0}
                       className="mt-4"
@@ -201,26 +190,18 @@ export default async function Page({
                 </div>
               </div>
             </div>
-            {tripDetails.tripExclusions.length > 0 ||
-            tripDetails.tripInclusions.length > 0 ? (
+            {tripDetails.tripExclusions.length > 0 || tripDetails.tripInclusions.length > 0 ? (
               <div className="w-full sm:mt-16 mt-8 border-t border-gray-200 sm:pt-16 pt-8 pb-8 px-2 grid md:grid-cols-2 grid-cols-1 sm:gap-8 gap-4">
                 {tripDetails.tripInclusions.length > 0 ? (
                   <div className="w-full md:p-10 p-6 bg-gray-50/50 rounded-xl text-black shadow-lg">
-                    <h4 className="sm:text-4xl text-3xl">
-                      Inclusion
-                    </h4>
+                    <h4 className="sm:text-4xl text-3xl font-dm-serif-display">Inclusion</h4>
                     <ul className="list-disc mt-4">
                       {tripDetails.tripInclusions.map((inclusion) => (
-                        <li
-                          key={inclusion.id}
-                          className="flex items-start mb-4"
-                        >
+                        <li key={inclusion.id} className="flex items-start mb-4">
                           <span className="w-1/20 !mr-2 min-w-2 h-6 flex items-center">
                             <div className="w-1.5 h-1.5 rounded-full bg-black" />
                           </span>
-                          <p className="sm:text-base text-sm w-9/10">
-                            {inclusion.displayText}
-                          </p>
+                          <p className="sm:text-base text-sm w-9/10">{inclusion.displayText}</p>
                         </li>
                       ))}
                     </ul>
@@ -228,21 +209,14 @@ export default async function Page({
                 ) : null}
                 {tripDetails.tripExclusions.length > 0 ? (
                   <div className="w-full md:p-10 p-6 bg-gray-50/50 rounded-xl text-black shadow-lg">
-                    <h4 className="sm:text-4xl text-3xl">
-                      Exclusion
-                    </h4>
+                    <h4 className="sm:text-4xl text-3xl font-dm-serif-display">Exclusion</h4>
                     <ul className="list-disc mt-4">
                       {tripDetails.tripExclusions.map((exclution) => (
-                        <li
-                          key={exclution.id}
-                          className="flex items-start mb-4"
-                        >
+                        <li key={exclution.id} className="flex items-start mb-4">
                           <span className="w-1/20 !mr-2 min-w-2 h-6 flex items-center">
                             <div className="w-1.5 h-1.5 rounded-full bg-black" />
                           </span>
-                          <p className="sm:text-base text-sm w-9/10">
-                            {exclution.displayText}
-                          </p>
+                          <p className="sm:text-base text-sm w-9/10">{exclution.displayText}</p>
                         </li>
                       ))}
                     </ul>

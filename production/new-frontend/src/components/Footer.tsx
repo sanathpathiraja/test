@@ -78,8 +78,8 @@ function Footer() {
                   Contact Us
                 </h4>
                 <ul className="mt-4 w-full">
-                  <li className="flex items-start mb-2 w-full">
-                    <Icon.Email className="text-2xl w-8 shrink-0 mt-0.5" />
+                  <li className="flex items-center gap-2 mb-2 w-full">
+                    <Icon.Email className="text-2xl mr-2" />
                     <a
                       href="mailto:operations@escaperoots.com.au"
                       className="text-lg lg:text-left hover:text-secondary"
@@ -87,24 +87,13 @@ function Footer() {
                       operations@escaperoots.com.au
                     </a>
                   </li>
-                  <li className="flex items-start mb-2 w-full">
-                    <Icon.Phone className="text-2xl w-8 shrink-0 mt-0.5" />
+                  <li className="flex items-center gap-2 w-full">
+                    <Icon.Phone className="text-2xl mr-2" />
                     <a
                       href="tel:+61884729866"
                       className="text-lg lg:text-left hover:text-secondary"
                     >
                       +61 8 8472 9866
-                    </a>
-                  </li>
-                  <li className="flex items-start mb-2 w-full">
-                    <Icon.Location className="text-2xl w-8 shrink-0 mt-0.5" />
-                    <a
-                      href="https://maps.google.com/?q=Level 30/91 King William St, Adelaide SA 5000, Australia"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-lg lg:text-left hover:text-secondary leading-snug"
-                    >
-                      Level 30/91 King William St, Adelaide SA 5000, Australia
                     </a>
                   </li>
                 </ul>
@@ -127,11 +116,11 @@ function Footer() {
                 <h4 className="text-secondary font-noraml text-2xl">
                   Instagram Feed
                 </h4>
-                <div className="mt-4 md:h-[218px] w-full overflow-hidden">
+                <div className="mt-4 w-full overflow-hidden">
                   <iframe
                     scrolling="no"
                     src="https://cdn.lightwidget.com/widgets/62e0c8519a515758ba576ca5c707620c.html"
-                    className="lightwidget-widget w-full border-0 overflow-hidden"
+                    className="w-full border-0 h-[300px]"
                   ></iframe>
                 </div>
               </div>

@@ -2,25 +2,66 @@ import { Metadata } from "next";
 import { OpenGraph } from "next/dist/lib/metadata/types/opengraph-types";
 
 export const environments = {
+	productionTemp: {
+		BASE_URL: "http://194.195.123.168",
+		BASE_API_URL: "http://194.195.123.168",
+		STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_PRODUCTION,
+	},
 	production: {
 		BASE_URL: "https://escaperoots.com.au",
 		BASE_API_URL: "https://escaperoots.com.au",
-		STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_PRODUCTION as string,
+		STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_PRODUCTION,
 	},
 	development: {
 		BASE_URL: "https://staging.escaperoots.com.au",
 		BASE_API_URL: "http://localhost:5164",
-		STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string,
+		STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 	},
 	staging: {
 		BASE_URL: "https://staging.escaperoots.com.au",
 		BASE_API_URL: "https://stagingapi.escaperoots.com.au/api",
-		STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string,
+		STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+	},
+	// Local API (run in its LocalLive environment) with the LIVE publishable key: real cards are charged.
+	// Only available under `next dev`; see resolveEnvironment.
+	localLive: {
+		BASE_URL: "http://localhost:3000",
+		BASE_API_URL: "http://localhost:5164",
+		STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_PRODUCTION,
 	},
 };
 
-const currentEnv: keyof typeof environments = "production";
-export const environment = environments[currentEnv];
+type EnvironmentName = keyof typeof environments;
+
+// Which Stripe key mode each environment must use; a key of the wrong mode is treated as not configured
+const liveStripeEnvironments: EnvironmentName[] = ["production", "productionTemp", "localLive"];
+
+// Set NEXT_PUBLIC_APP_ENV to choose the environment. Without it, `next dev` uses the local API
+// so development never sends bookings/payments to production, and builds keep using production.
+function resolveEnvironment(): EnvironmentName {
+	const configured = process.env.NEXT_PUBLIC_APP_ENV;
+	if (configured) {
+		if (!(configured in environments)) {
+			throw new Error(`Unknown NEXT_PUBLIC_APP_ENV "${configured}". Expected one of: ${Object.keys(environments).join(", ")}`);
+		}
+		if (configured === "localLive" && process.env.NODE_ENV !== "development") {
+			throw new Error('NEXT_PUBLIC_APP_ENV "localLive" is only allowed with `next dev`; it must never be built or deployed.');
+		}
+		return configured as EnvironmentName;
+	}
+	return process.env.NODE_ENV === "development" ? "development" : "production";
+}
+
+export const currentEnv = resolveEnvironment();
+const expectedStripeKeyPrefix = liveStripeEnvironments.includes(currentEnv) ? "pk_live_" : "pk_test_";
+const configuredStripeKey = environments[currentEnv].STRIPE_KEY;
+export const environment = {
+	...environments[currentEnv],
+	STRIPE_KEY: configuredStripeKey?.startsWith(expectedStripeKeyPrefix) ? configuredStripeKey : undefined,
+};
+if (configuredStripeKey && !environment.STRIPE_KEY) {
+	console.error(`Stripe publishable key for "${currentEnv}" is not a ${expectedStripeKeyPrefix} key; payments are disabled.`);
+}
 
 export const BASE_API_URL = environment.BASE_API_URL + "/api/";
 

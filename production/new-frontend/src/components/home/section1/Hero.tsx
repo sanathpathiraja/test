@@ -11,11 +11,12 @@ async function Hero() {
   try {
     const response = await fetch(endpoints.trips.countries, {
       next: { revalidate: 300 },
-	  cache: "no-store", // prevents build-time failures
+      cache: "no-store", // prevents build-time failures
     });
 
     if (!response.ok) {
-      console.error("Hero: failed to fetch countries");
+      alert("ss");
+      console.error("Hero: failed to fetch countries1");
     } else {
       const data = (await response.json()) as ResponseType<CountryType[]>;
       countries = data?.data ?? [];

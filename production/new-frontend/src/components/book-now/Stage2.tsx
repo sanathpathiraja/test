@@ -92,16 +92,34 @@ type BookingTravelerType = {
 	passportNo: string;
 };
 
+type BookingErrorResponse = {
+	errors?: Record<string, string[]>;
+	problemDetails?: { title?: string; validationErrors?: Record<string, string[]> } | null;
+};
+
+// Collects the server's validation messages (ASP.NET model-state or app validator format)
+function getBookingErrorMessages(body: BookingErrorResponse | null): string[] {
+	const fieldErrors = body?.errors ?? body?.problemDetails?.validationErrors;
+	const messages = fieldErrors ? Object.values(fieldErrors).flat() : [];
+	if (messages.length > 0) return messages;
+	return body?.problemDetails?.title ? [body.problemDetails.title] : [];
+}
+
 type Stage2Props = {
 	data: BookingDetailsType;
 	nextStage: () => void;
 	previousStage: () => void;
 	details: TripType;
 	info: BookingInfoType;
+	booking?: BookingType;
 	setBooking: (booking: BookingType) => void;
 };
 
-function Stage2({ data, nextStage, previousStage, details, info, setBooking }: Stage2Props) {
+function Stage2({ data, nextStage, previousStage, details, info, booking, setBooking }: Stage2Props) {
+	const [submitting, setSubmitting] = React.useState(false);
+	const [errors, setErrors] = React.useState<string[]>([]);
+	const submittingRef = React.useRef(false);
+
 	function genderValidater(gender: BookingPersonType["gender"]): number {
 		if (gender === "male") return 1;
 		else if (gender === "female") return 2;
@@ -125,6 +143,16 @@ function Stage2({ data, nextStage, previousStage, details, info, setBooking }: S
 	}
 
 	async function handleNextStage() {
+		if (submittingRef.current) return;
+		// A booking was already created for these details (user came back from payment) - reuse it
+		if (booking) {
+			nextStage();
+			return;
+		}
+		submittingRef.current = true;
+		setSubmitting(true);
+		setErrors([]);
+
 		const totalAmount =
 			data.secondary.filter((tt) => tt.travelerType === "child").length * details.accomadationPriceChild +
 			(data.secondary.filter((tt) => tt.travelerType === "adult").length + 1) * details.accomadationPriceAdult;
@@ -158,19 +186,39 @@ function Stage2({ data, nextStage, previousStage, details, info, setBooking }: S
 				},
 				body: JSON.stringify(sendData),
 			});
-			if (!response.ok) {
-				console.error("Failed to book trip", response.status, response.statusText, await response.json());
+			const result = (await response.json().catch(() => null)) as
+				| (ResponseType<BookingType> & BookingErrorResponse)
+				| null;
+			if (!response.ok || !result?.isSuccess || !result.data) {
+				const messages = getBookingErrorMessages(result);
+				console.error("Failed to book trip", response.status, messages);
+				setErrors(messages.length > 0 ? messages : ["We couldn't create your booking. Please try again."]);
+				window.scrollTo({ top: 0, behavior: "smooth" });
+				return;
 			}
-			const { data } = (await response.json()) as ResponseType<BookingType>;
-			setBooking(data);
+			setBooking(result.data);
 			nextStage();
 		} catch (error) {
 			console.error("Failed to book trip", error);
+			setErrors(["We couldn't create your booking. Please check your connection and try again."]);
+		} finally {
+			submittingRef.current = false;
+			setSubmitting(false);
 		}
 	}
 
 	return (
 		<div>
+			{errors.length > 0 && (
+				<div className="w-full bg-red-500/10 border border-red-500 p-4 rounded-sm text-sm flex items-start text-red-500 mb-4">
+					<Icon.Warning className="inline mr-2 mt-0.5 shrink-0" />
+					<ul>
+						{errors.map((message, index) => (
+							<li key={index}>{message}</li>
+						))}
+					</ul>
+				</div>
+			)}
 			<BookNowCard>
 				<div>
 					<h2 className="text-2xl font-bold">Total Amount (A$)</h2>
@@ -211,7 +259,13 @@ function Stage2({ data, nextStage, previousStage, details, info, setBooking }: S
 						<span>Previous</span>
 					</div>
 				</Button>
-				<Button size={"xl"} onClick={handleNextStage} className="btn btn-primary sm:w-48 w-full">
+				<Button
+					size={"xl"}
+					onClick={handleNextStage}
+					loading={submitting}
+					disabled={submitting}
+					className="btn btn-primary sm:w-48 w-full"
+				>
 					<div className="flex items-center justify-between w-full">
 						<span>Next</span>
 						<Icon.ArrowRight className="inline" />
